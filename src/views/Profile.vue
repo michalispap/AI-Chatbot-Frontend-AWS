@@ -81,4 +81,14 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+
+@media (max-width: 600px),
+       (orientation: landscape) and (max-height: 600px) {
+  .profile-container {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}
 </style>

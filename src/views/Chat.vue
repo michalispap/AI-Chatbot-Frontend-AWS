@@ -131,4 +131,14 @@ const bubbleClass = (role) => {
 .send-btn:hover {
   background: #0056b3;
 }
+
+@media (max-width: 600px),
+       (orientation: landscape) and (max-height: 600px) {
+  .chat-page {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}
 </style>
