@@ -1,7 +1,7 @@
 <template>
   <nav>
     <div class="brand">
-      <img src="/student.png" alt="Student Logo" class="nav-logo" />
+      <!--<img src="/student.png" alt="Student Logo" class="nav-logo" />-->
       <h1>Better Canvas</h1>
     </div>
     <div class="links">
@@ -23,7 +23,7 @@ nav {
   position: sticky;
   top: 0;
   z-index: 999;
-  background: #007bff;
+  background: #409cff;
   color: white;
   padding: 15px;
   display: flex;
@@ -55,7 +55,7 @@ nav {
 }
 
 .logout-btn {
-  background-color: #ea574f;
+  background-color: #1d63ae;
   border: none;
   padding: 8px 14px;
   border-radius: 5px;
@@ -65,7 +65,7 @@ nav {
 }
 
 .logout-btn:hover {
-  background-color: #c93328;
+  background-color: #0056b3;
 }
 
 @media (max-width: 600px) {

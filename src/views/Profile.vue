@@ -69,7 +69,7 @@ input {
 }
 
 button {
-  background-color: #0056b3;
+  background-color: #409cff;
   color: white;
   border: none;
   padding: 10px;
@@ -79,6 +79,6 @@ button {
 }
 
 button:hover {
-  background-color: #004494;
+  background-color: #0056b3;
 }
 </style>
