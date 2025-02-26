@@ -11,11 +11,12 @@ export const useUserStore = defineStore("user", () => {
 
   const fetchUser = async () => {
     try {
-      const response = await apiClient.get("/user"); //replace with actual endpoint
+      // Update with actual user endpoint
+      const response = await apiClient.get("/users/me");
       user.value = {
-        firstName: response.data.firstName,
-        lastName: response.data.lastName,
-        email: response.data.email,
+        firstName: response.data.firstName || response.data.given_name || '',
+        lastName: response.data.lastName || response.data.family_name || '',
+        email: response.data.email || '',
       };
     } catch (error) {
       console.error(
@@ -24,16 +25,18 @@ export const useUserStore = defineStore("user", () => {
       );
     }
   };
-
+  
   const updateUser = async (newUserData) => {
     try {
-      await apiClient.put("/user", newUserData); //replace with actual endpoint
+      // Update with actual user update endpoint
+      await apiClient.put("/users/me", newUserData);
       user.value = newUserData;
     } catch (error) {
       console.error(
         "Error updating user:",
         error.response?.data || error.message
       );
+      throw error;
     }
   };
 

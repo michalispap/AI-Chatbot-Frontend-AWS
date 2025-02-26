@@ -1,12 +1,13 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import apiClient from "../services/api";
 
 export const useChatStore = defineStore("chat", () => {
   const messages = ref([]);
 
   const fetchMessages = () => {
     messages.value = [];
-    // Add initial welcome message from AI
+    // Add initial welcome message
     messages.value.push({
       id: Date.now(),
       role: "ai",
@@ -14,11 +15,5 @@ export const useChatStore = defineStore("chat", () => {
     });
   };
 
-  // For compatibility with the enhanced Chat.vue
-  const sendMessage = (text) => {
-    // This method is kept for compatibility but actual implementation
-    // is now in the Chat.vue component for better animation control
-  };
-
-  return { messages, fetchMessages, sendMessage };
+  return { messages, fetchMessages };
 });

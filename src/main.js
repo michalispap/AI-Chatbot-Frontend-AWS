@@ -7,15 +7,15 @@ import { Amplify } from 'aws-amplify';
 Amplify.configure({
   Auth: {
     Cognito: {
-      region: 'us-east-1', //replace with actual region
-      userPoolId: 'us-east-1_abc123', //replace with actual pool ID
-      userPoolWebClientId: '1234567890abcdef', // replace with actual client ID
+      region: 'eu-central-1',
+      userPoolId: 'eu-central-1_ujDEumbz7',
+      userPoolWebClientId: '6d2oc9v4mao92bsupqfto99cnl',
       
       oauth: {
-        domain: 'your-domain.auth.us-east-1.amazoncognito.com', //replace with actual Cognito domain
-        scope: ['email', 'profile', 'openid'],
-        redirectSignIn: '/', //replace with actual app URL
-        redirectSignOut: '/', //replace with actual app URL
+        domain: 'eu-central-1-ujdeumbz7.auth.eu-central-1.amazoncognito.com',
+        scope: ['email', 'profile', 'openid', 'phone'],
+        redirectSignIn: 'https://master.d3nlp5uork9q7a.amplifyapp.com/',
+        redirectSignOut: 'https://master.d3nlp5uork9q7a.amplifyapp.com/',
         responseType: 'code'
       }
     }

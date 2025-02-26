@@ -48,6 +48,7 @@
 import { onMounted, ref } from "vue";
 import { useChatStore } from "../stores/chat";
 import { storeToRefs } from "pinia";
+import apiClient from "../services/api";
 
 const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
@@ -83,9 +84,13 @@ const sendMessage = async () => {
       message: ""
     });
     
-    // Simulate API delay
-    setTimeout(() => {
-      // Remove typing indicator and add real message
+    try {
+      // Call actual AI API endpoint
+      const response = await apiClient.post("/chat", {
+        message: userText
+      });
+      
+      // Remove typing indicator
       const index = messages.value.findIndex(m => m.id === aiTypingId);
       if (index !== -1) {
         messages.value.splice(index, 1);
@@ -96,9 +101,24 @@ const sendMessage = async () => {
       messages.value.push({
         id: aiMsgId,
         role: "ai",
-        message: "I am your favorite AI assistant!"
+        message: response.data.message || response.data.response || "I didn't get a proper response."
       });
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
       
+      // Remove typing indicator
+      const index = messages.value.findIndex(m => m.id === aiTypingId);
+      if (index !== -1) {
+        messages.value.splice(index, 1);
+      }
+      
+      // Add error message
+      messages.value.push({
+        id: Date.now() + 3,
+        role: "ai",
+        message: "Sorry, I encountered an error. Please try again."
+      });
+    } finally {
       typingMessageId.value = null;
       isLoading.value = false;
       
@@ -106,7 +126,7 @@ const sendMessage = async () => {
       setTimeout(() => {
         lastMessageId.value = null;
       }, 2000);
-    }, 1500);
+    }
   }
 };
 
@@ -116,6 +136,7 @@ const bubbleClass = (role) => {
 </script>
 
 <style scoped>
+
 .chat-page {
   display: flex;
   flex-direction: column;
