@@ -1,10 +1,11 @@
 <template>
   <nav>
     <div class="brand">
-      <!--<img src="/student.png" alt="Student Logo" class="nav-logo" />-->
-      <h1>Better Canvas</h1>
+      <router-link to="/" class="brand-link">
+        <h1>Better Canvas</h1>
+      </router-link>
     </div>
-    <div class="links">
+    <div class="links" v-if="!isLoginPage">
       <router-link to="/profile">Profile</router-link>
       <router-link to="/chat">Chat</router-link>
       <button class="logout-btn" @click="handleLogout">Log out</button>
@@ -14,10 +15,16 @@
 
 <script setup>
 import { useAuthStore } from "../stores/auth";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+import { computed } from "vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
+
+const isLoginPage = computed(() => {
+  return route.path === "/login";
+});
 
 const handleLogout = async () => {
   await authStore.signOut();
@@ -42,6 +49,12 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.brand-link {
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
 }
 
 .nav-logo {

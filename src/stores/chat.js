@@ -14,21 +14,10 @@ export const useChatStore = defineStore("chat", () => {
     });
   };
 
-  // Push user message and AI response
+  // For compatibility with the enhanced Chat.vue
   const sendMessage = (text) => {
-    const userMsg = {
-      id: Date.now(),
-      role: "user",
-      message: text,
-    };
-    messages.value.push(userMsg);
-
-    const aiMsg = {
-      id: Date.now() + 1,
-      role: "ai",
-      message: "I am your favorite AI assistant!",
-    };
-    messages.value.push(aiMsg);
+    // This method is kept for compatibility but actual implementation
+    // is now in the Chat.vue component for better animation control
   };
 
   return { messages, fetchMessages, sendMessage };

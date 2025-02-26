@@ -7,7 +7,18 @@
         class="message"
         :class="bubbleClass(msg.role)"
       >
-        {{ msg.message }}
+        <template v-if="msg.id === typingMessageId && msg.role === 'ai'">
+          <span class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </template>
+        <template v-else>
+          <span class="message-text" :class="{'animate-text': msg.id === lastMessageId}">
+            {{ msg.message }}
+          </span>
+        </template>
       </div>
     </div>
 
@@ -16,8 +27,9 @@
         v-model="newMessage"
         @keyup.enter="sendMessage"
         placeholder="Type a message..."
+        :disabled="isLoading"
       />
-      <button @click="sendMessage" class="send-btn">
+      <button @click="sendMessage" class="send-btn" :disabled="isLoading">
         <svg
           width="20"
           height="20"
@@ -40,15 +52,61 @@ import { storeToRefs } from "pinia";
 const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
 const newMessage = ref("");
+const isLoading = ref(false);
+const typingMessageId = ref(null);
+const lastMessageId = ref(null);
 
 onMounted(() => {
   chatStore.fetchMessages();
 });
 
 const sendMessage = async () => {
-  if (newMessage.value.trim() !== "") {
-    await chatStore.sendMessage(newMessage.value.trim());
+  if (newMessage.value.trim() !== "" && !isLoading.value) {
+    const userText = newMessage.value.trim();
     newMessage.value = "";
+    isLoading.value = true;
+    
+    // Add user message immediately
+    const userMsgId = Date.now();
+    messages.value.push({
+      id: userMsgId,
+      role: "user",
+      message: userText
+    });
+    
+    // Add typing indicator
+    const aiTypingId = Date.now() + 1;
+    typingMessageId.value = aiTypingId;
+    messages.value.push({
+      id: aiTypingId,
+      role: "ai",
+      message: ""
+    });
+    
+    // Simulate API delay
+    setTimeout(() => {
+      // Remove typing indicator and add real message
+      const index = messages.value.findIndex(m => m.id === aiTypingId);
+      if (index !== -1) {
+        messages.value.splice(index, 1);
+      }
+      
+      const aiMsgId = Date.now() + 2;
+      lastMessageId.value = aiMsgId;
+      messages.value.push({
+        id: aiMsgId,
+        role: "ai",
+        message: "I am your favorite AI assistant!"
+      });
+      
+      typingMessageId.value = null;
+      isLoading.value = false;
+      
+      // Reset animation class after animation completes
+      setTimeout(() => {
+        lastMessageId.value = null;
+      }, 2000);
+    }, 1500);
   }
 };
 
@@ -129,6 +187,59 @@ const bubbleClass = (role) => {
 
 .send-btn:hover {
   background: #0056b3;
+}
+
+.send-btn:disabled,
+input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+}
+
+.typing-indicator span {
+  height: 8px;
+  width: 8px;
+  margin: 0 2px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.7;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Text animation */
+.animate-text {
+  display: inline-block;
+  white-space: pre-wrap;
+  overflow: hidden;
+  animation: typing 1.5s steps(40, end);
+}
+
+@keyframes typing {
+  from { max-height: 0; opacity: 0; }
+  to { max-height: 1000px; opacity: 1; }
 }
 
 @media (max-width: 600px),
