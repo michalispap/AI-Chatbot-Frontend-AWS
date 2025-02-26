@@ -7,7 +7,7 @@
     <div class="links">
       <router-link to="/profile">Profile</router-link>
       <router-link to="/chat">Chat</router-link>
-      <button class="logout-btn" @click="handleLogout">Logout</button>
+      <button class="logout-btn" @click="handleLogout">Log out</button>
     </div>
   </nav>
 </template>

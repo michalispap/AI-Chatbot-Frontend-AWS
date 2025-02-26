@@ -1,13 +1,13 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { signIn, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { signOut, getCurrentUser, fetchAuthSession, signInWithRedirect } from 'aws-amplify/auth';
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
   const isAuthenticated = ref(false);
   const isLoading = ref(true);
 
-  // Check current auth status
+  //Check current auth status
   const checkAuth = async () => {
     isLoading.value = true;
     try {
@@ -21,22 +21,21 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading.value = false;
   };
 
-  // Sign in user
-  const signInUser = async (username, password) => {
+  //Sign in
+  const signInWithHostedUI = async () => {
     try {
-      const userData = await signIn({ username, password });
-      user.value = userData;
-      isAuthenticated.value = true;
-      return userData;
+      await signInWithRedirect();
+
     } catch (error) {
+      console.error("Error starting sign-in process:", error);
       throw error;
     }
   };
 
-  // Sign out user
+  // Sign out
   const signOutUser = async () => {
     try {
-      await signOut();
+      await signOut({ global: true });
       user.value = null;
       isAuthenticated.value = false;
     } catch (error) {
@@ -49,7 +48,7 @@ export const useAuthStore = defineStore("auth", () => {
     isAuthenticated,
     isLoading,
     checkAuth,
-    signIn: signInUser,
+    signInWithHostedUI,
     signOut: signOutUser
   };
 });

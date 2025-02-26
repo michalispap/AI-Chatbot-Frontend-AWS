@@ -27,22 +27,22 @@ const router = createRouter({
   routes,
 });
 
-// Navigation guard to protect routes
+//Navigation guard to protect routes
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     try {
       const session = await fetchAuthSession();
       if (session.tokens) {
-        next(); // User is authenticated, proceed
+        next(); //User is authenticated, proceed
       } else {
         next({ path: "/login" });
       }
     } catch (error) {
-      // User is not authenticated, redirect to login
+      //User is not authenticated, redirect to login
       next({ path: "/login" });
     }
   } else {
-    next(); // Route doesn't require auth, proceed
+    next(); //Route doesn't require auth, proceed
   }
 });
 

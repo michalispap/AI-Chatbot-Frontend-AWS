@@ -104,7 +104,6 @@ const bubbleClass = (role) => {
   bottom: 0;
   background: #fff;
   display: flex;
-  /*border-top: 1px solid #ddd;*/
   padding: 10px;
   background-color: #d6e6ff;
 }
