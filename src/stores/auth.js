@@ -1,13 +1,14 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { signOut, getCurrentUser, fetchAuthSession, signInWithRedirect } from 'aws-amplify/auth';
+import { signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { signInWithRedirect } from 'aws-amplify/auth/cognito';
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
   const isAuthenticated = ref(false);
   const isLoading = ref(true);
 
-  //Check current auth status
+  // Check current auth status
   const checkAuth = async () => {
     isLoading.value = true;
     try {
@@ -21,18 +22,17 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading.value = false;
   };
 
-  //Sign in
+  // Sign in with Cognito Hosted UI
   const signInWithHostedUI = async () => {
     try {
       await signInWithRedirect();
-
     } catch (error) {
       console.error("Error starting sign-in process:", error);
       throw error;
     }
   };
 
-  // Sign out
+  // Sign out user
   const signOutUser = async () => {
     try {
       await signOut({ global: true });
