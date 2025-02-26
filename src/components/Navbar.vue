@@ -13,8 +13,15 @@
 </template>
 
 <script setup>
-const handleLogout = () => {
-  alert("Logout feature not implemented yet!");
+import { useAuthStore } from "../stores/auth";
+import { useRouter } from "vue-router";
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+const handleLogout = async () => {
+  await authStore.signOut();
+  router.push("/login");
 };
 </script>
 
