@@ -74,6 +74,18 @@
         <span>Chat history cleared</span>
       </div>
     </div>
+    
+    <!-- Token Warning Toast -->
+    <div class="toast-notification token-warning" v-if="showTokenWarning" :class="{ 'show': showTokenWarning }">
+      <div class="toast-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span>Warning: {{ availableTokens }} tokens remaining</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -94,6 +106,11 @@ const messageContainer = ref(null);
 const showDeleteConfirm = ref(false);
 const showToast = ref(false);
 
+// Token warning variables
+const showTokenWarning = ref(false);
+const availableTokens = ref(0);
+const tokenCheckInterval = ref(null);
+
 // Animation durations
 const TYPING_ANIMATION_DURATION = 1400;
 const NEW_MESSAGE_ANIMATION_DURATION = 1500;
@@ -110,11 +127,24 @@ onMounted(() => {
   chatStore.fetchMessages();
   scrollToBottom();
   
+  // Check tokens on initial load
+  checkAvailableTokens();
+  
+  // Set up interval to check tokens periodically (every 5 minutes)
+  tokenCheckInterval.value = setInterval(() => {
+    checkAvailableTokens();
+  }, 5 * 60 * 1000);
+  
   // Clean up on component unmount
   return () => {
     window.removeEventListener('scroll', preventScroll);
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
+    
+    // Clear the token check interval
+    if (tokenCheckInterval.value) {
+      clearInterval(tokenCheckInterval.value);
+    }
   };
 });
 
@@ -127,6 +157,29 @@ const scrollToBottom = async () => {
   await nextTick();
   if (messageContainer.value) {
     messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+  }
+};
+
+// Function to check available tokens
+const checkAvailableTokens = async () => {
+  try {
+    const cognitoUser = await getCurrentUser();
+    const userId = cognitoUser.userId;
+    
+    const response = await apiClient.get(`/api/chat/available_tokens/${userId}`);
+    availableTokens.value = response.data.tokens || response.data;
+    
+    // Show warning if tokens are below 1000
+    if (availableTokens.value < 1000) {
+      showTokenWarning.value = true;
+      
+      // Hide the warning after 5 seconds
+      setTimeout(() => {
+        showTokenWarning.value = false;
+      }, 5000);
+    }
+  } catch (error) {
+    console.error("Failed to fetch available tokens:", error);
   }
 };
 
@@ -206,6 +259,9 @@ const sendMessage = async () => {
       
       // Scroll to show AI response
       await scrollToBottom();
+      
+      // Check tokens after sending a message
+      checkAvailableTokens();
       
     } catch (error) {
       console.error("Chat process error:", error);
@@ -509,6 +565,21 @@ const bubbleClass = (role) => {
 
 .toast-content svg {
   stroke: #4CAF50;
+}
+
+/* Token warning toast styles */
+.token-warning {
+  top: 130px; /* Position below the regular toast if both are showing */
+}
+
+.token-warning .toast-content svg {
+  stroke: #FFC107; /* Yellow warning color */
+}
+
+.token-warning .toast-content {
+  background-color: #FFF8E1; /* Light yellow background */
+  color: #FF8F00; /* Amber text color */
+  border-left: 4px solid #FFC107;
 }
 
 @keyframes bounce {
