@@ -13,14 +13,8 @@ Amplify.configure({
         oauth: {
           domain: 'eu-central-1ujdeumbz7.auth.eu-central-1.amazoncognito.com',
           scopes: ['email', 'profile', 'openid'],
-          redirectSignIn: [
-            'https://master.d3nlp5uork9q7a.amplifyapp.com',
-            'http://localhost:3000'
-          ],
-          redirectSignOut: [
-            'https://master.d3nlp5uork9q7a.amplifyapp.com',
-            'http://localhost:3000'
-          ],
+          redirectSignIn: 'https://master.d3nlp5uork9q7a.amplifyapp.com/callback',
+          redirectSignOut: 'https://master.d3nlp5uork9q7a.amplifyapp.com',
           responseType: 'code'
         }
       }

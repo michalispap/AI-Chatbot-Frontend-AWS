@@ -3,29 +3,13 @@ import Profile from "../views/Profile.vue";
 import Chat from "../views/Chat.vue";
 import Login from "../views/Login.vue";
 import AuthCallback from "../views/AuthCallback.vue";
-import { fetchAuthSession } from 'aws-amplify/auth';
 
 const routes = [
   { path: "/", redirect: "/chat" },
-  { 
-    path: "/profile", 
-    component: Profile,
-    meta: { requiresAuth: true }
-  },
-  { 
-    path: "/chat", 
-    component: Chat,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: "/login",
-    component: Login
-  },
-
-  {
-    path: "/callback",
-    component: AuthCallback
-  }
+  { path: "/profile", component: Profile, meta: { requiresAuth: true } },
+  { path: "/chat", component: Chat, meta: { requiresAuth: true } },
+  { path: "/login", component: Login },
+  { path: "/callback", component: AuthCallback }  // New callback route
 ];
 
 const router = createRouter({
