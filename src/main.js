@@ -3,7 +3,6 @@ import App from './App.vue';
 import router from './router/index.js';
 import { createPinia } from 'pinia';
 import { Amplify } from 'aws-amplify';
-import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
 
 Amplify.configure({
   Auth: {
