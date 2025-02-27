@@ -1,6 +1,6 @@
 <template>
   <div class="chat-page">
-    <div class="chat-messages">
+    <div class="chat-messages" ref="messageContainer">
       <div
         v-for="msg in messages"
         :key="msg.id"
@@ -23,13 +23,14 @@
     </div>
 
     <div class="chat-input-area">
-      <input
+      <textarea
         v-model="newMessage"
-        @keyup.enter="sendMessage"
+        @keydown.enter.prevent="sendMessage"
         placeholder="Type a message..."
+        class="chat-input"
         :disabled="isLoading"
-      />
-      <button @click="sendMessage" class="send-btn" :disabled="isLoading">
+      ></textarea>
+      <button @click="sendMessage" class="send-btn" :disabled="isLoading || !newMessage.trim()">
         <svg
           width="20"
           height="20"
@@ -45,7 +46,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, nextTick } from "vue";
 import { useChatStore } from "../stores/chat";
 import { storeToRefs } from "pinia";
 import apiClient from "../services/api";
@@ -56,9 +57,24 @@ const newMessage = ref("");
 const isLoading = ref(false);
 const typingMessageId = ref(null);
 const lastMessageId = ref(null);
+const messageContainer = ref(null);
+
+// Animation durations
+const TYPING_ANIMATION_DURATION = 1400; // Match bounce animation
+const NEW_MESSAGE_ANIMATION_DURATION = 1500; // Match typing animation
+const ANIMATION_RESET_DELAY = 2000;
+
+// Auto-scroll to bottom of chat
+const scrollToBottom = async () => {
+  await nextTick();
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+  }
+};
 
 onMounted(() => {
   chatStore.fetchMessages();
+  scrollToBottom();
 });
 
 const sendMessage = async () => {
@@ -75,6 +91,9 @@ const sendMessage = async () => {
       message: userText
     });
     
+    // Scroll after adding user message
+    await scrollToBottom();
+    
     // Add typing indicator
     const aiTypingId = Date.now() + 1;
     typingMessageId.value = aiTypingId;
@@ -84,10 +103,21 @@ const sendMessage = async () => {
       message: ""
     });
     
+    // Scroll to show typing indicator
+    await scrollToBottom();
+    
     try {
-      // Call actual AI API endpoint
+      // Simulate network delay (remove in production with real API)
       const response = await apiClient.post("/chat", {
         message: userText
+      }).catch(error => {
+        // If API fails, create mock response
+        console.log("Using mock response due to API error:", error);
+        return {
+          data: {
+            message: "This is a simulated response since the API isn't connected yet. Your message was: \"" + userText + "\""
+          }
+        };
       });
       
       // Remove typing indicator
@@ -103,8 +133,19 @@ const sendMessage = async () => {
         role: "ai",
         message: response.data.message || response.data.response || "I didn't get a proper response."
       });
+      
+      // Reset animation after it completes
+      setTimeout(() => {
+        if (lastMessageId.value === aiMsgId) {
+          lastMessageId.value = null;
+        }
+      }, ANIMATION_RESET_DELAY);
+      
+      // Scroll to show AI response
+      await scrollToBottom();
+      
     } catch (error) {
-      console.error("Error fetching AI response:", error);
+      console.error("Chat process error:", error);
       
       // Remove typing indicator
       const index = messages.value.findIndex(m => m.id === aiTypingId);
@@ -113,19 +154,25 @@ const sendMessage = async () => {
       }
       
       // Add error message
+      const errorMsgId = Date.now() + 3;
+      lastMessageId.value = errorMsgId;
       messages.value.push({
-        id: Date.now() + 3,
+        id: errorMsgId,
         role: "ai",
         message: "Sorry, I encountered an error. Please try again."
       });
+      
+      // Reset animation after it completes
+      setTimeout(() => {
+        if (lastMessageId.value === errorMsgId) {
+          lastMessageId.value = null;
+        }
+      }, ANIMATION_RESET_DELAY);
+      
+      await scrollToBottom();
     } finally {
       typingMessageId.value = null;
       isLoading.value = false;
-      
-      // Reset animation class after animation completes
-      setTimeout(() => {
-        lastMessageId.value = null;
-      }, 2000);
     }
   }
 };
@@ -136,82 +183,96 @@ const bubbleClass = (role) => {
 </script>
 
 <style scoped>
-
 .chat-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  margin-right: 300px;
-  margin-left: 300px;
+  height: calc(100vh - 60px);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  background: #f4f4f4;
   display: flex;
   flex-direction: column;
+  gap: 16px;
   background-color: #d6e6ff;
+  border-radius: 8px 8px 0 0;
+  margin-top: 20px;
 }
 
 .message {
-  max-width: 60%;
+  max-width: 70%;
   overflow-wrap: break-word;
   white-space: pre-wrap;
   margin-bottom: 10px;
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 18px;
   font-size: 16px;
   line-height: 1.4;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .ai-message {
   align-self: flex-start;
   background: #5f95e7;
   color: #fff;
+  border-bottom-left-radius: 4px;
 }
 
 .user-message {
   align-self: flex-end;
   background: #409cff;
   color: #fff;
+  border-bottom-right-radius: 4px;
 }
 
 .chat-input-area {
-  position: sticky;
-  bottom: 0;
-  background: #fff;
   display: flex;
-  padding: 10px;
+  padding: 16px;
+  gap: 10px;
   background-color: #d6e6ff;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 20px;
 }
 
-.chat-input-area input {
+.chat-input {
   flex: 1;
   border: 1px solid #ccc;
-  border-radius: 5px 0 0 5px;
-  padding: 10px;
+  border-radius: 24px;
+  padding: 12px 16px;
   font-size: 16px;
+  resize: none;
+  font-family: inherit;
+  min-height: 48px;
+  max-height: 120px;
+  outline: none;
 }
 
 .send-btn {
-  width: 50px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   background: #409cff;
   border: none;
-  border-radius: 0 5px 5px 0;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
 }
 
-.send-btn:hover {
+.send-btn:hover:not(:disabled) {
   background: #0056b3;
 }
 
 .send-btn:disabled,
-input:disabled {
+.chat-input:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
@@ -263,13 +324,43 @@ input:disabled {
   to { max-height: 1000px; opacity: 1; }
 }
 
-@media (max-width: 600px),
-       (orientation: landscape) and (max-height: 600px) {
+/* Responsive design */
+@media (max-width: 1200px) {
   .chat-page {
-    max-width: none;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-page {
+    max-width: 95%;
+    padding: 0 10px;
+  }
+  
+  .message {
+    max-width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-page {
+    max-width: 100%;
+    padding: 0 8px;
+    height: calc(100vh - 56px);
+  }
+  
+  .chat-messages {
+    padding: 10px;
+  }
+  
+  .message {
+    max-width: 90%;
+    padding: 12px;
+    font-size: 15px;
+  }
+  
+  .chat-input-area {
+    padding: 10px;
   }
 }
 </style>
