@@ -7,15 +7,15 @@ import { Amplify } from 'aws-amplify';
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: 'eu-central-1_ujDEumbz7',
-      userPoolClientId: '6d2oc9v4mao92bsupqfto99cnl',
+      userPoolId: 'eu-central-1_DYaYaoaK4',
+      userPoolClientId: '4d7lkoonmut5jvc0i42np9ds1f',
       loginWith: {
         oauth: {
-          domain: 'eu-central-1ujdeumbz7.auth.eu-central-1.amazoncognito.com',
+          domain: 'eu-central-1dyayaoak4.auth.eu-central-1.amazoncognito.com',
           scopes: ['email', 'profile', 'openid'],
           responseType: 'code',
-          redirectSignIn: ['https://master.d3nlp5uork9q7a.amplifyapp.com'],
-          redirectSignOut: ['https://master.d3nlp5uork9q7a.amplifyapp.com']
+          redirectSignIn: ['https://master.d3nlp5uork9q7a.amplifyapp.com/'],
+          redirectSignOut: ['https://master.d3nlp5uork9q7a.amplifyapp.com/']
         }
       }
     }
