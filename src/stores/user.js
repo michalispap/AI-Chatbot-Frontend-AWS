@@ -8,37 +8,60 @@ export const useUserStore = defineStore("user", () => {
     lastName: "",
     email: "",
   });
+  
+  const isLoading = ref(false);
+  const error = ref(null);
 
+  // Using hardcoded studentId S123
   const fetchUser = async () => {
+    isLoading.value = true;
+    error.value = null;
+    
     try {
-      // Update with actual user endpoint
-      const response = await apiClient.get("/users/me");
+      // Request to the specific endpoint with hardcoded student ID
+      const response = await apiClient.get("/api/students/S123");
+      
+      // Map the response fields to our user object
       user.value = {
-        firstName: response.data.firstName || response.data.given_name || '',
-        lastName: response.data.lastName || response.data.family_name || '',
-        email: response.data.email || '',
+        firstName: response.data.first_name || "",
+        lastName: response.data.last_name || "",
+        email: response.data.email || "",
       };
-    } catch (error) {
-      console.error(
-        "Error fetching user data:",
-        error.response?.data || error.message
-      );
+      
+      // We're intentionally excluding studentId and timestamp
+      console.log("Profile data loaded successfully");
+      
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      error.value = "Failed to load profile data. Please try again later.";
+    } finally {
+      isLoading.value = false;
     }
   };
   
   const updateUser = async (newUserData) => {
+    isLoading.value = true;
+    error.value = null;
+    
     try {
-      // Update with actual user update endpoint
-      await apiClient.put("/users/me", newUserData);
+      // We could implement the update functionality later
+      // This is a placeholder for now
+      await apiClient.put("/api/students/S123", {
+        first_name: newUserData.firstName,
+        last_name: newUserData.lastName,
+        email: newUserData.email
+      });
+      
       user.value = newUserData;
-    } catch (error) {
-      console.error(
-        "Error updating user:",
-        error.response?.data || error.message
-      );
-      throw error;
+      return true;
+    } catch (err) {
+      console.error("Error updating user:", err);
+      error.value = "Failed to update profile. Please try again later.";
+      throw err;
+    } finally {
+      isLoading.value = false;
     }
   };
 
-  return { user, fetchUser, updateUser };
+  return { user, isLoading, error, fetchUser, updateUser };
 });
