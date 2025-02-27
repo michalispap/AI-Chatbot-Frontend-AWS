@@ -13,10 +13,16 @@ Amplify.configure({
       identityPoolId: undefined,
       loginWith: {
         oauth: {
-          domain: 'eu-central-1-ujdeumbz7.auth.eu-central-1.amazoncognito.com',
+          domain: 'eu-central-1ujdeumbz7.auth.eu-central-1.amazoncognito.com',
           scopes: ['email', 'profile', 'openid', 'phone'],
-          redirectSignIn: ['https://master.d3nlp5uork9q7a.amplifyapp.com/'],
-          redirectSignOut: ['https://master.d3nlp5uork9q7a.amplifyapp.com/'],
+          redirectSignIn: [
+            'https://master.d3nlp5uork9q7a.amplifyapp.com/',
+            'http://localhost:3000/'
+          ],
+          redirectSignOut: [
+            'https://master.d3nlp5uork9q7a.amplifyapp.com/',
+            'http://localhost:3000/'
+          ],
           responseType: 'code'
         }
       }

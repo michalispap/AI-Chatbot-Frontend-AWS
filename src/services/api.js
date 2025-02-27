@@ -2,7 +2,7 @@ import axios from "axios";
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 const apiClient = axios.create({
-  baseURL: "https://api.yourdomain.com", // Replace with actual API endpoint
+  baseURL: "https://backend-api.com", // Replace with actual API endpoint
   headers: {
     "Content-Type": "application/json",
   },
