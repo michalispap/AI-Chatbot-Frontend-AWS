@@ -35,10 +35,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to) => {
-  if (!to.meta.requiresAuth) {
-    return true;
-  }
-
+  if (!to.meta.requiresAuth) return true;
   try {
     const session = await fetchAuthSession();
     if (!session.tokens) {

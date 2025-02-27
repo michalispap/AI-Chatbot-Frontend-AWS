@@ -11,7 +11,7 @@ Amplify.configure({
       userPoolClientId: '6d2oc9v4mao92bsupqfto99cnl',
       loginWith: {
         oauth: {
-          domain: 'eu-central-1ujdeumbz7.auth.eu-central-1.amazoncognito.com',
+          domain: 'https://eu-central-1ujdeumbz7.auth.eu-central-1.amazoncognito.com',
           scopes: ['email', 'profile', 'openid'],
           responseType: 'code',
           redirectSignIn: ['https://master.d3nlp5uork9q7a.amplifyapp.com'],
