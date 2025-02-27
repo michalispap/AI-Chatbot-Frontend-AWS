@@ -22,10 +22,6 @@
       </div>
     </div>
 
-    <div class="chat-actions">
-      <button @click="chatStore.clearHistory()" class="clear-btn">Clear History</button>
-    </div>
-
     <div class="chat-input-area">
       <textarea
         v-model="newMessage"

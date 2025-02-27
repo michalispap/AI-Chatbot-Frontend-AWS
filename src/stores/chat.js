@@ -43,5 +43,6 @@ export const useChatStore = defineStore("chat", () => {
     saveMessages();
   };
 
-  return { messages, fetchMessages, addMessage, clearHistory };
+  // Export saveMessages function
+  return { messages, fetchMessages, addMessage, clearHistory, saveMessages };
 });
