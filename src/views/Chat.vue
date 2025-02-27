@@ -1,9 +1,9 @@
 <template>
   <div class="chat-page">
     <div class="chat-header">
-      <h2>Chat Assistant</h2>
+      <h2>AI Chat Assistant 🤖</h2>
       <button @click="showDeleteConfirm = true" class="clear-btn" title="Clear chat history">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         </svg>
@@ -243,33 +243,37 @@ const bubbleClass = (role) => {
 
 .chat-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 10px 0;
   margin-top: 10px;
+  position: relative;
 }
 
 .chat-header h2 {
   font-size: 1.5rem;
   color: #333;
   margin: 0;
+  text-align: center;
 }
 
 .clear-btn {
-  background: none;
+  position: absolute;
+  right: 0;
+  background-color: rgba(220, 53, 69, 0.1);
   border: none;
-  color: #555;
+  color: #dc3545;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 10px;
   border-radius: 50%;
   transition: background-color 0.2s;
 }
 
 .clear-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(220, 53, 69, 0.2);
 }
 
 .chat-messages {
@@ -327,9 +331,16 @@ const bubbleClass = (role) => {
   font-size: 16px;
   resize: none;
   font-family: inherit;
-  height: 50px; /* Fixed height instead of min/max */
+  height: 60px; /* Increased fixed height */
   outline: none;
-  overflow-y: auto;
+  overflow-y: hidden; /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* Hide scrollbar for Chrome/Safari/Opera */
+.chat-input::-webkit-scrollbar {
+  display: none;
 }
 
 .send-btn {

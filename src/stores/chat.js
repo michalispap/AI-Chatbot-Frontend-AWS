@@ -38,7 +38,7 @@ export const useChatStore = defineStore("chat", () => {
     messages.value = [{
       id: Date.now(),
       role: "ai",
-      message: "Chat history cleared. How can I help you today?",
+      message: "How can I help you today?",
     }];
     saveMessages();
   };
