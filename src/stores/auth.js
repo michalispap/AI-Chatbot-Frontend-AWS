@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import { signInWithRedirect } from 'aws-amplify/auth/cognito';
+import { signInWithRedirect } from 'aws-amplify/auth';
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -22,7 +22,7 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading.value = false;
   };
 
-  // Sign in with Cognito Hosted UI
+  // Sign in using Hosted UI
   const signInWithHostedUI = async () => {
     try {
       await signInWithRedirect();
