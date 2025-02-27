@@ -2,7 +2,7 @@
   <div class="callback-container">
     <div class="loading">
       <div class="spinner"></div>
-      <p>Authenticating...</p>
+      <p>Completing authentication...</p>
     </div>
   </div>
 </template>
@@ -10,8 +10,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { signInWithRedirect } from 'aws-amplify/auth';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
@@ -19,16 +18,17 @@ const authStore = useAuthStore();
 
 onMounted(async () => {
   try {
-    // Get the current authenticated user
-    const user = await getCurrentUser();
-    if (user) {
+    // First, try to get the auth session which will process the OAuth callback
+    const session = await fetchAuthSession();
+    
+    if (session.tokens) {
       // Update authentication state
       await authStore.checkAuth();
       // Redirect to the chat page after successful authentication
       router.replace('/chat');
     } else {
-      // If no user, try signing in
-      await signInWithRedirect();
+      console.error('No session tokens found');
+      router.replace('/login');
     }
   } catch (error) {
     console.error('Error during authentication callback:', error);
