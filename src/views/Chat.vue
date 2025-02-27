@@ -82,6 +82,7 @@ import { onMounted, ref, nextTick } from "vue";
 import { useChatStore } from "../stores/chat";
 import { storeToRefs } from "pinia";
 import apiClient from "../services/api";
+import { getCurrentUser } from 'aws-amplify/auth';
 
 const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
@@ -171,9 +172,14 @@ const sendMessage = async () => {
     await scrollToBottom();
     
     try {
-      // Send message to real backend endpoint with correct payload format
+      // Get the Cognito user ID
+      const cognitoUser = await getCurrentUser();
+      const studentId = cognitoUser.userId;
+      
+      // Send message to real backend endpoint with updated payload format
       const response = await apiClient.post("/api/chat/prompt", {
-        prompt: userText  // Using "prompt" as the key instead of "message"
+        prompt: userText,
+        studentId: studentId // Include the Cognito User ID
       });
       
       // Remove typing indicator
