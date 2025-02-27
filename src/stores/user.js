@@ -8,7 +8,8 @@ export const useUserStore = defineStore("user", () => {
     firstName: "",
     lastName: "",
     email: "",
-    id: ""
+    id: "",
+    isProfileComplete: false
   });
   
   const isLoading = ref(false);
@@ -19,37 +20,47 @@ export const useUserStore = defineStore("user", () => {
     error.value = null;
     
     try {
-      // Get Cognito user information - both ID and email
+      // Get Cognito user information
       const cognitoUser = await getCurrentUser();
       user.value.id = cognitoUser.userId;
       
       // Fetch user attributes to get email
-      const userAttributes = await fetchUserAttributes();
-      user.value.email = userAttributes.email || "";
-      
-      console.log("Using Cognito User ID:", user.value.id);
-      console.log("Using Cognito Email:", user.value.email);
+      try {
+        const userAttributes = await fetchUserAttributes();
+        user.value.email = userAttributes.email || "";
+        
+        console.log("Using Cognito User ID:", user.value.id);
+        console.log("Using Cognito Email:", user.value.email);
+      } catch (attributeError) {
+        console.warn("Couldn't fetch user attributes:", attributeError);
+      }
       
       if (!user.value.id) {
         throw new Error("Could not get user ID");
       }
       
-      if (!user.value.email) {
-        throw new Error("Could not get user email from Cognito");
+      try {
+        // Request to the specific endpoint with the actual user ID
+        const response = await apiClient.get(`/api/students/${user.value.id}`);
+        
+        // Map the response fields but keep email from Cognito if available
+        user.value = {
+          id: user.value.id,
+          email: user.value.email || response.data.email || "",
+          firstName: response.data.first_name || "",
+          lastName: response.data.last_name || "",
+          isProfileComplete: true
+        };
+        
+        console.log("Profile data loaded successfully");
+      } catch (apiError) {
+        // If user profile doesn't exist, keep the Cognito data
+        if (apiError.response?.status === 404) {
+          user.value.isProfileComplete = false;
+        } else {
+          throw apiError;
+        }
       }
-      
-      // Request to the specific endpoint with the actual user ID
-      const response = await apiClient.get(`/api/students/${user.value.id}`);
-      
-      // Map the response fields but keep email from Cognito
-      user.value = {
-        id: user.value.id,
-        email: user.value.email, // Keep Cognito email
-        firstName: response.data.first_name || "",
-        lastName: response.data.last_name || "",
-      };
-      
-      console.log("Profile data loaded successfully");
       
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -65,13 +76,18 @@ export const useUserStore = defineStore("user", () => {
     
     try {
       // Make sure we have the user ID and email
-      if (!user.value.id || !user.value.email) {
+      if (!user.value.id) {
         const cognitoUser = await getCurrentUser();
         user.value.id = cognitoUser.userId;
-        
-        // Fetch user attributes to get email
-        const userAttributes = await fetchUserAttributes();
-        user.value.email = userAttributes.email || "";
+      }
+      
+      if (!user.value.email) {
+        try {
+          const userAttributes = await fetchUserAttributes();
+          user.value.email = userAttributes.email || "";
+        } catch (attributeError) {
+          console.warn("Couldn't fetch user attributes:", attributeError);
+        }
       }
       
       // POST to upsert endpoint with email from Cognito
@@ -79,14 +95,15 @@ export const useUserStore = defineStore("user", () => {
         id: user.value.id,
         first_name: newUserData.firstName,
         last_name: newUserData.lastName,
-        email: user.value.email  // Using email from Cognito
+        email: user.value.email
       });
       
       // Update local state
       user.value = {
         ...user.value,
         firstName: newUserData.firstName,
-        lastName: newUserData.lastName
+        lastName: newUserData.lastName,
+        isProfileComplete: true
       };
       
       return response.data;
@@ -99,5 +116,23 @@ export const useUserStore = defineStore("user", () => {
     }
   };
 
-  return { user, isLoading, error, fetchUser, updateUser };
+  // Check if the user profile is complete
+  const checkProfileComplete = async () => {
+    try {
+      await fetchUser();
+      return user.value.isProfileComplete;
+    } catch (error) {
+      console.error("Error checking if profile is complete:", error);
+      return false;
+    }
+  };
+
+  return { 
+    user, 
+    isLoading, 
+    error, 
+    fetchUser, 
+    updateUser, 
+    checkProfileComplete 
+  };
 });
