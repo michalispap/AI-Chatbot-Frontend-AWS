@@ -1,5 +1,15 @@
 <template>
   <div class="chat-page">
+    <div class="chat-header">
+      <h2>Chat Assistant</h2>
+      <button @click="showDeleteConfirm = true" class="clear-btn" title="Clear chat history">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
+    </div>
+    
     <div class="chat-messages" ref="messageContainer">
       <div
         v-for="msg in messages"
@@ -42,6 +52,28 @@
         </svg>
       </button>
     </div>
+    
+    <!-- Delete Confirmation Popup -->
+    <div class="popup-overlay" v-if="showDeleteConfirm">
+      <div class="popup-container">
+        <h3>Clear Chat History</h3>
+        <p>Are you sure you want to delete all chat messages? This cannot be undone.</p>
+        <div class="popup-buttons">
+          <button @click="showDeleteConfirm = false" class="cancel-btn">Cancel</button>
+          <button @click="clearHistory" class="confirm-btn">Delete</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast-notification" v-if="showToast" :class="{ 'show': showToast }">
+      <div class="toast-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Chat history cleared</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -58,6 +90,8 @@ const isLoading = ref(false);
 const typingMessageId = ref(null);
 const lastMessageId = ref(null);
 const messageContainer = ref(null);
+const showDeleteConfirm = ref(false);
+const showToast = ref(false);
 
 // Animation durations
 const TYPING_ANIMATION_DURATION = 1400;
@@ -76,6 +110,18 @@ onMounted(() => {
   chatStore.fetchMessages();
   scrollToBottom();
 });
+
+// Clear history with confirmation
+const clearHistory = () => {
+  chatStore.clearHistory();
+  showDeleteConfirm.value = false;
+  showToast.value = true;
+  
+  // Auto-hide toast after 3 seconds
+  setTimeout(() => {
+    showToast.value = false;
+  }, 3000);
+};
 
 const sendMessage = async () => {
   if (newMessage.value.trim() !== "" && !isLoading.value) {
@@ -192,6 +238,38 @@ const bubbleClass = (role) => {
   max-width: 960px;
   margin: 0 auto;
   padding: 0 20px;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin-top: 10px;
+}
+
+.chat-header h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.clear-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .chat-messages {
@@ -201,32 +279,8 @@ const bubbleClass = (role) => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background-color: #f0f4f8;
+  background-color: #d6e6ff; /* Match the background color from App.vue */
   border-radius: 8px 8px 0 0;
-  margin-top: 20px;
-}
-
-.chat-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px 16px;
-  background-color: #f0f4f8;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.clear-btn {
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 4px 12px;
-  font-size: 14px;
-  color: #555;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.clear-btn:hover {
-  background-color: #e0e0e0;
 }
 
 .message {
@@ -259,7 +313,7 @@ const bubbleClass = (role) => {
   display: flex;
   padding: 16px;
   gap: 10px;
-  background-color: #f0f4f8;
+  background-color: #d6e6ff; /* Match the background color */
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0 0 8px 8px;
   margin-bottom: 20px;
@@ -273,9 +327,9 @@ const bubbleClass = (role) => {
   font-size: 16px;
   resize: none;
   font-family: inherit;
-  min-height: 48px;
-  max-height: 120px;
+  height: 50px; /* Fixed height instead of min/max */
   outline: none;
+  overflow-y: auto;
 }
 
 .send-btn {
@@ -327,6 +381,90 @@ const bubbleClass = (role) => {
   animation-delay: -0.16s;
 }
 
+/* Popup styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.popup-container h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  padding: 8px 16px;
+  background-color: #f1f1f1;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  padding: 8px 16px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Toast notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background-color: #333;
+  color: white;
+  padding: 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.toast-notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  gap: 10px;
+}
+
+.toast-content svg {
+  stroke: #4CAF50;
+}
+
 @keyframes bounce {
   0%, 80%, 100% {
     transform: scale(0);
@@ -360,6 +498,8 @@ const bubbleClass = (role) => {
   .chat-page {
     max-width: 95%;
     padding: 0 10px;
+    width: 100%;
+    overflow-x: hidden;
   }
   
   .message {
@@ -386,6 +526,10 @@ const bubbleClass = (role) => {
   
   .chat-input-area {
     padding: 10px;
+  }
+  
+  body {
+    overflow-x: hidden;
   }
 }
 </style>
