@@ -171,17 +171,9 @@ const sendMessage = async () => {
     await scrollToBottom();
     
     try {
-      // Simulate network delay (remove in production with real API)
-      const response = await apiClient.post("/chat", {
-        message: userText
-      }).catch(error => {
-        // If API fails, create mock response
-        console.log("Using mock response due to API error:", error);
-        return {
-          data: {
-            message: "This is a simulated response since the API isn't connected yet. Your message was: \"" + userText + "\""
-          }
-        };
+      // Send message to real backend endpoint with correct payload format
+      const response = await apiClient.post("/api/chat/prompt", {
+        prompt: userText  // Using "prompt" as the key instead of "message"
       });
       
       // Remove typing indicator

@@ -1,13 +1,8 @@
 import axios from "axios";
 import { fetchAuthSession } from 'aws-amplify/auth';
 
-// Development flag to switch between mock and real API
-const USE_MOCK_API = true; // Change to false when connecting to actual backend
-
 const apiClient = axios.create({
-  baseURL: USE_MOCK_API ? 
-    "https://backend-api.com" : // Replace with actual API when ready
-    "https://your-real-backend-url.com", 
+  baseURL: "http://bettercanvas.eu-central-1.elasticbeanstalk.com",
   headers: {
     "Content-Type": "application/json",
   },
@@ -50,25 +45,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// Mock API functions for development
-export const mockAPI = {
-  chat: (message) => {
-    return Promise.resolve({
-      data: {
-        message: `This is a mock response to: "${message}"`
-      }
-    });
-  },
-  getUser: () => {
-    return Promise.resolve({
-      data: {
-        firstName: "Demo",
-        lastName: "User",
-        email: "demo@example.com"
-      }
-    });
-  }
-};
 
 export default apiClient;
