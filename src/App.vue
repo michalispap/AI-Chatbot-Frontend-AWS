@@ -35,10 +35,6 @@ onMounted(async () => {
   if (authStore.isAuthenticated) {
     // Check if user has a complete profile
     await checkUserProfile();
-    
-    if (!isCheckingProfile.value && !showWelcomeModal.value) {
-      router.push('/chat');
-    }
   }
 });
 
@@ -73,7 +69,6 @@ const checkUserProfile = async () => {
 // Called when user completes the welcome modal
 const completeWelcome = () => {
   showWelcomeModal.value = false;
-  router.push('/chat');
 };
 </script>
 
