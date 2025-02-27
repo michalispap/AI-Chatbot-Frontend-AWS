@@ -22,6 +22,10 @@
       </div>
     </div>
 
+    <div class="chat-actions">
+      <button @click="chatStore.clearHistory()" class="clear-btn">Clear History</button>
+    </div>
+
     <div class="chat-input-area">
       <textarea
         v-model="newMessage"
@@ -60,8 +64,8 @@ const lastMessageId = ref(null);
 const messageContainer = ref(null);
 
 // Animation durations
-const TYPING_ANIMATION_DURATION = 1400; // Match bounce animation
-const NEW_MESSAGE_ANIMATION_DURATION = 1500; // Match typing animation
+const TYPING_ANIMATION_DURATION = 1400;
+const NEW_MESSAGE_ANIMATION_DURATION = 1500;
 const ANIMATION_RESET_DELAY = 2000;
 
 // Auto-scroll to bottom of chat
@@ -85,7 +89,7 @@ const sendMessage = async () => {
     
     // Add user message immediately
     const userMsgId = Date.now();
-    messages.value.push({
+    chatStore.addMessage({
       id: userMsgId,
       role: "user",
       message: userText
@@ -97,7 +101,7 @@ const sendMessage = async () => {
     // Add typing indicator
     const aiTypingId = Date.now() + 1;
     typingMessageId.value = aiTypingId;
-    messages.value.push({
+    chatStore.addMessage({
       id: aiTypingId,
       role: "ai",
       message: ""
@@ -124,11 +128,12 @@ const sendMessage = async () => {
       const index = messages.value.findIndex(m => m.id === aiTypingId);
       if (index !== -1) {
         messages.value.splice(index, 1);
+        chatStore.saveMessages(); // Save after removing typing indicator
       }
       
       const aiMsgId = Date.now() + 2;
       lastMessageId.value = aiMsgId;
-      messages.value.push({
+      chatStore.addMessage({
         id: aiMsgId,
         role: "ai",
         message: response.data.message || response.data.response || "I didn't get a proper response."
@@ -151,12 +156,13 @@ const sendMessage = async () => {
       const index = messages.value.findIndex(m => m.id === aiTypingId);
       if (index !== -1) {
         messages.value.splice(index, 1);
+        chatStore.saveMessages(); // Save after removing typing indicator
       }
       
       // Add error message
       const errorMsgId = Date.now() + 3;
       lastMessageId.value = errorMsgId;
-      messages.value.push({
+      chatStore.addMessage({
         id: errorMsgId,
         role: "ai",
         message: "Sorry, I encountered an error. Please try again."
@@ -199,9 +205,32 @@ const bubbleClass = (role) => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background-color: #d6e6ff;
+  background-color: #f0f4f8;
   border-radius: 8px 8px 0 0;
   margin-top: 20px;
+}
+
+.chat-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  background-color: #f0f4f8;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.clear-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background-color: #e0e0e0;
 }
 
 .message {
@@ -218,14 +247,14 @@ const bubbleClass = (role) => {
 
 .ai-message {
   align-self: flex-start;
-  background: #5f95e7;
-  color: #fff;
+  background: #ffffff;
+  color: #333;
   border-bottom-left-radius: 4px;
 }
 
 .user-message {
   align-self: flex-end;
-  background: #409cff;
+  background: #007bff;
   color: #fff;
   border-bottom-right-radius: 4px;
 }
@@ -234,7 +263,7 @@ const bubbleClass = (role) => {
   display: flex;
   padding: 16px;
   gap: 10px;
-  background-color: #d6e6ff;
+  background-color: #f0f4f8;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0 0 8px 8px;
   margin-bottom: 20px;
@@ -257,7 +286,7 @@ const bubbleClass = (role) => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #409cff;
+  background: #007bff;
   border: none;
   display: flex;
   justify-content: center;
@@ -287,7 +316,7 @@ const bubbleClass = (role) => {
   height: 8px;
   width: 8px;
   margin: 0 2px;
-  background-color: #ffffff;
+  background-color: #333;
   border-radius: 50%;
   display: inline-block;
   opacity: 0.7;
