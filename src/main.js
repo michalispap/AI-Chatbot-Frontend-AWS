@@ -9,13 +9,12 @@ Amplify.configure({
     Cognito: {
       userPoolId: 'eu-central-1_ujDEumbz7',
       userPoolClientId: '6d2oc9v4mao92bsupqfto99cnl',
-      identityPoolId: undefined,
       loginWith: {
         oauth: {
           domain: 'eu-central-1ujdeumbz7.auth.eu-central-1.amazoncognito.com',
           scopes: ['email', 'profile', 'openid', 'phone'],
           redirectSignIn: [
-            'https://master.d3nlp5uork9q7a.amplifyapp.com/',
+            'https://master.d3nlp5uork9q7a.amplifyapp.com/', 
             'http://localhost:3000/'
           ],
           redirectSignOut: [
