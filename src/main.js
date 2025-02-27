@@ -13,15 +13,9 @@ Amplify.configure({
         oauth: {
           domain: 'eu-central-1ujdeumbz7.auth.eu-central-1.amazoncognito.com',
           scopes: ['email', 'profile', 'openid'],
-          redirectSignIn: [
-            'https://master.d3nlp5uork9q7a.amplifyapp.com',
-            'https://master.d3nlp5uork9q7a.amplifyapp.com/'
-          ],
-          redirectSignOut: [
-            'https://master.d3nlp5uork9q7a.amplifyapp.com',
-            'https://master.d3nlp5uork9q7a.amplifyapp.com/'
-          ],
-          responseType: 'code'
+          responseType: 'code',
+          redirectSignIn: 'https://master.d3nlp5uork9q7a.amplifyapp.com',
+          redirectSignOut: 'https://master.d3nlp5uork9q7a.amplifyapp.com'
         }
       }
     }

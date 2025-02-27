@@ -11,11 +11,16 @@
 import Navbar from "./components/Navbar.vue";
 import { onMounted } from "vue";
 import { useAuthStore } from "./stores/auth";
+import { useRouter } from "vue-router";
 
 const authStore = useAuthStore();
+const router = useRouter();
 
 onMounted(async () => {
   await authStore.checkAuth();
+  if (authStore.isAuthenticated) {
+    router.push('/chat');
+  }
 });
 </script>
 

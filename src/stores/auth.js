@@ -1,7 +1,12 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
-import { signInWithRedirect } from 'aws-amplify/auth';
+import { 
+  signOut, 
+  getCurrentUser, 
+  fetchAuthSession, 
+  signInWithRedirect,
+  autoSignIn
+} from 'aws-amplify/auth';
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -12,14 +17,21 @@ export const useAuthStore = defineStore("auth", () => {
   const checkAuth = async () => {
     isLoading.value = true;
     try {
-      const userData = await getCurrentUser();
-      user.value = userData;
-      isAuthenticated.value = true;
+      await autoSignIn();
+      const session = await fetchAuthSession();
+      if (session.tokens) {
+        const userData = await getCurrentUser();
+        user.value = userData;
+        isAuthenticated.value = true;
+      } else {
+        throw new Error('No valid session');
+      }
     } catch (error) {
       user.value = null;
       isAuthenticated.value = false;
+    } finally {
+      isLoading.value = false;
     }
-    isLoading.value = false;
   };
 
   // Sign in using Hosted UI
@@ -42,6 +54,9 @@ export const useAuthStore = defineStore("auth", () => {
       console.error("Error signing out:", error);
     }
   };
+
+  // Initialize auth state
+  checkAuth();
 
   return {
     user,

@@ -2,16 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import Profile from "../views/Profile.vue";
 import Chat from "../views/Chat.vue";
 import Login from "../views/Login.vue";
-import AuthCallback from "../views/AuthCallback.vue";
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 const routes = [
-  {
-    path: "/callback",
-    name: "Callback",
-    component: AuthCallback,
-    meta: { requiresAuth: false }
-  },
   {
     path: "/login",
     name: "Login",
@@ -42,20 +35,18 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to) => {
-  if (to.path === '/callback') {
+  if (!to.meta.requiresAuth) {
     return true;
   }
 
-  if (to.meta.requiresAuth) {
-    try {
-      const session = await fetchAuthSession();
-      if (!session.tokens) {
-        return '/login';
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
+  try {
+    const session = await fetchAuthSession();
+    if (!session.tokens) {
       return '/login';
     }
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    return '/login';
   }
   return true;
 });
