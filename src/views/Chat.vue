@@ -65,7 +65,7 @@
       </div>
     </div>
     
-    <!-- Toast Notification (now at the top) -->
+    <!-- Toast Notification (at the top) -->
     <div class="toast-notification" v-if="showToast" :class="{ 'show': showToast }">
       <div class="toast-content">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -98,6 +98,29 @@ const TYPING_ANIMATION_DURATION = 1400;
 const NEW_MESSAGE_ANIMATION_DURATION = 1500;
 const ANIMATION_RESET_DELAY = 2000;
 
+// Prevent window scrolling
+onMounted(() => {
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+  
+  // Add event listener to ensure window doesn't scroll
+  window.addEventListener('scroll', preventScroll);
+  
+  chatStore.fetchMessages();
+  scrollToBottom();
+  
+  // Clean up on component unmount
+  return () => {
+    window.removeEventListener('scroll', preventScroll);
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  };
+});
+
+const preventScroll = () => {
+  window.scrollTo(0, 0);
+};
+
 // Auto-scroll to bottom of chat
 const scrollToBottom = async () => {
   await nextTick();
@@ -105,11 +128,6 @@ const scrollToBottom = async () => {
     messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
   }
 };
-
-onMounted(() => {
-  chatStore.fetchMessages();
-  scrollToBottom();
-});
 
 // Clear history with confirmation
 const clearHistory = () => {
@@ -231,6 +249,14 @@ const bubbleClass = (role) => {
 </script>
 
 <style scoped>
+/* Global style to prevent scrolling */
+:global(html), :global(body) {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
 .chat-page {
   display: flex;
   flex-direction: column;
@@ -238,7 +264,12 @@ const bubbleClass = (role) => {
   max-width: 960px;
   margin: 0 auto;
   padding: 0 20px;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-x: hidden;
+  position: fixed; /* Lock position */
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px); /* Account for padding */
+  max-width: 960px;
 }
 
 .chat-header {
@@ -248,6 +279,7 @@ const bubbleClass = (role) => {
   padding: 10px 0;
   margin-top: 10px;
   position: relative;
+  width: 100%;
 }
 
 .chat-header h2 {
@@ -283,8 +315,10 @@ const bubbleClass = (role) => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background-color: #d6e6ff; /* Match the background color from App.vue */
+  background-color: #d6e6ff;
   border-radius: 8px 8px 0 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .message {
@@ -314,32 +348,30 @@ const bubbleClass = (role) => {
 }
 
 .chat-input-area {
-  display: flex;
   padding: 16px;
-  gap: 10px;
-  background-color: #d6e6ff; /* Match the background color */
+  background-color: #d6e6ff;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0 0 8px 8px;
   margin-bottom: 20px;
-  min-width: 0; /* Prevent flex items from growing beyond container */
   width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
 }
 
 .chat-input {
-  flex: 1;
+  width: calc(100% - 60px);
   border: 1px solid #ccc;
   border-radius: 24px;
   padding: 12px 16px;
   font-size: 16px;
   resize: none;
   font-family: inherit;
-  height: 60px; /* Increased fixed height */
+  height: 60px;
   outline: none;
-  overflow-y: hidden; /* Hide scrollbar */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  min-width: calc(100% - 70px); /* Account for send button width + gap */
-  transition: none; /* Prevent any animations that could cause resizing */
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   box-sizing: border-box;
 }
 
@@ -452,9 +484,9 @@ const bubbleClass = (role) => {
 /* Toast notification at the top */
 .toast-notification {
   position: fixed;
-  top: 70px; /* Position below navbar */
+  top: 70px;
   left: 50%;
-  transform: translateX(-50%) translateY(-100px); /* Start above the viewport */
+  transform: translateX(-50%) translateY(-100px);
   background-color: #333;
   color: white;
   padding: 0;
@@ -466,7 +498,7 @@ const bubbleClass = (role) => {
 }
 
 .toast-notification.show {
-  transform: translateX(-50%) translateY(0); /* Slide down to visible position */
+  transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
 
@@ -514,8 +546,7 @@ const bubbleClass = (role) => {
   .chat-page {
     max-width: 95%;
     padding: 0 10px;
-    width: 100%;
-    overflow-x: hidden;
+    width: calc(100% - 20px);
   }
   
   .message {
@@ -528,6 +559,7 @@ const bubbleClass = (role) => {
     max-width: 100%;
     padding: 0 8px;
     height: calc(100vh - 56px);
+    width: calc(100% - 16px);
   }
   
   .chat-messages {
@@ -542,10 +574,6 @@ const bubbleClass = (role) => {
   
   .chat-input-area {
     padding: 10px;
-  }
-  
-  body {
-    overflow-x: hidden;
   }
 }
 </style>
