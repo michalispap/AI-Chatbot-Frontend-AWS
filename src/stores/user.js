@@ -1,14 +1,14 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import apiClient from "../services/api";
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
 
 export const useUserStore = defineStore("user", () => {
   const user = ref({
     firstName: "",
     lastName: "",
     email: "",
-    id: "" // To store the Cognito user ID
+    id: ""
   });
   
   const isLoading = ref(false);
@@ -19,19 +19,34 @@ export const useUserStore = defineStore("user", () => {
     error.value = null;
     
     try {
-      // Get Cognito user ID
+      // Get Cognito user information - both ID and email
       const cognitoUser = await getCurrentUser();
-      user.value.id = cognitoUser.userId || "S123"; // Fallback to S123 if not available
+      user.value.id = cognitoUser.userId;
       
-      // Request to the specific endpoint
-      const response = await apiClient.get("/api/students/S123");
+      // Fetch user attributes to get email
+      const userAttributes = await fetchUserAttributes();
+      user.value.email = userAttributes.email || "";
       
-      // Map the response fields to our user object
+      console.log("Using Cognito User ID:", user.value.id);
+      console.log("Using Cognito Email:", user.value.email);
+      
+      if (!user.value.id) {
+        throw new Error("Could not get user ID");
+      }
+      
+      if (!user.value.email) {
+        throw new Error("Could not get user email from Cognito");
+      }
+      
+      // Request to the specific endpoint with the actual user ID
+      const response = await apiClient.get(`/api/students/${user.value.id}`);
+      
+      // Map the response fields but keep email from Cognito
       user.value = {
-        ...user.value, // Keep the ID
+        id: user.value.id,
+        email: user.value.email, // Keep Cognito email
         firstName: response.data.first_name || "",
         lastName: response.data.last_name || "",
-        email: response.data.email || "",
       };
       
       console.log("Profile data loaded successfully");
@@ -49,22 +64,32 @@ export const useUserStore = defineStore("user", () => {
     error.value = null;
     
     try {
-      // POST to upsert endpoint with the required format
+      // Make sure we have the user ID and email
+      if (!user.value.id || !user.value.email) {
+        const cognitoUser = await getCurrentUser();
+        user.value.id = cognitoUser.userId;
+        
+        // Fetch user attributes to get email
+        const userAttributes = await fetchUserAttributes();
+        user.value.email = userAttributes.email || "";
+      }
+      
+      // POST to upsert endpoint with email from Cognito
       const response = await apiClient.post("/api/students/upsert", {
-        id: user.value.id,  // Use the Cognito ID
+        id: user.value.id,
         first_name: newUserData.firstName,
         last_name: newUserData.lastName,
-        email: user.value.email  // Keep the original email, don't allow changes
+        email: user.value.email  // Using email from Cognito
       });
       
-      // Update local state with new values but keep email unchanged
+      // Update local state
       user.value = {
         ...user.value,
         firstName: newUserData.firstName,
         lastName: newUserData.lastName
       };
       
-      return response.data; // Return response for UI feedback
+      return response.data;
     } catch (err) {
       console.error("Error updating user:", err);
       error.value = "Failed to update profile. Please try again later.";
