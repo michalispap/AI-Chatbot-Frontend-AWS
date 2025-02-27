@@ -1,7 +1,7 @@
 <template>
   <div class="chat-page">
     <div class="chat-header">
-      <h2>AI Chat Assistant 🤖</h2>
+      <h2>🤖 AI Chat Assistant</h2>
       <button @click="showDeleteConfirm = true" class="clear-btn" title="Clear chat history">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"></polyline>
@@ -65,7 +65,7 @@
       </div>
     </div>
     
-    <!-- Toast Notification -->
+    <!-- Toast Notification (now at the top) -->
     <div class="toast-notification" v-if="showToast" :class="{ 'show': showToast }">
       <div class="toast-content">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -321,6 +321,8 @@ const bubbleClass = (role) => {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0 0 8px 8px;
   margin-bottom: 20px;
+  min-width: 0; /* Prevent flex items from growing beyond container */
+  width: 100%;
 }
 
 .chat-input {
@@ -336,6 +338,9 @@ const bubbleClass = (role) => {
   overflow-y: hidden; /* Hide scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
+  min-width: calc(100% - 70px); /* Account for send button width + gap */
+  transition: none; /* Prevent any animations that could cause resizing */
+  box-sizing: border-box;
 }
 
 /* Hide scrollbar for Chrome/Safari/Opera */
@@ -444,12 +449,12 @@ const bubbleClass = (role) => {
   cursor: pointer;
 }
 
-/* Toast notification */
+/* Toast notification at the top */
 .toast-notification {
   position: fixed;
-  bottom: 20px;
+  top: 70px; /* Position below navbar */
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
+  transform: translateX(-50%) translateY(-100px); /* Start above the viewport */
   background-color: #333;
   color: white;
   padding: 0;
@@ -461,7 +466,7 @@ const bubbleClass = (role) => {
 }
 
 .toast-notification.show {
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0); /* Slide down to visible position */
   opacity: 1;
 }
 
