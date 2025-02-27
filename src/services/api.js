@@ -2,7 +2,8 @@ import axios from "axios";
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 const apiClient = axios.create({
-  baseURL: "http://bettercanvas.eu-central-1.elasticbeanstalk.com",
+  // Updated base URL
+  baseURL: "https://7fd04wud6d.execute-api.eu-central-1.amazonaws.com",
   headers: {
     "Content-Type": "application/json",
   },

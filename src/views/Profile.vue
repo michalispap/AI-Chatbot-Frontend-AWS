@@ -18,7 +18,8 @@
       <input v-model="user.lastName" type="text" />
 
       <label>Email</label>
-      <input v-model="user.email" type="email" />
+      <input v-model="user.email" type="email" disabled />
+      <small>Email cannot be changed</small>
 
       <div class="form-actions">
         <button type="submit" :disabled="isSubmitting">
@@ -31,7 +32,7 @@
       </div>
       
       <div v-if="saveSuccess" class="success-message">
-        Profile updated successfully!
+        {{ saveMessage }}
       </div>
     </form>
   </div>
@@ -48,6 +49,7 @@ const { user, isLoading, error } = storeToRefs(userStore);
 const isSubmitting = ref(false);
 const saveError = ref(null);
 const saveSuccess = ref(false);
+const saveMessage = ref("Profile updated successfully!");
 
 onMounted(() => {
   userStore.fetchUser();
@@ -59,13 +61,14 @@ const saveProfile = async () => {
   isSubmitting.value = true;
   
   try {
-    await userStore.updateUser({
+    const response = await userStore.updateUser({
       firstName: user.value.firstName,
       lastName: user.value.lastName,
-      email: user.value.email,
+      // Email is not included since we don't want to update it
     });
     
     saveSuccess.value = true;
+    saveMessage.value = response?.message || "Profile updated successfully!";
     
     // Hide success message after 3 seconds
     setTimeout(() => {
@@ -109,6 +112,17 @@ input {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
+}
+
+input:disabled {
+  background-color: #f1f1f1;
+  cursor: not-allowed;
+}
+
+small {
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: -10px;
 }
 
 .form-actions {
