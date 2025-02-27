@@ -6,29 +6,32 @@ import AuthCallback from "../views/AuthCallback.vue";
 import { fetchAuthSession } from 'aws-amplify/auth';
 
 const routes = [
-  // Auth callback route must be first and not require authentication
-  { 
-    path: "/callback", 
+  {
+    path: "/callback",
+    name: "Callback",
     component: AuthCallback,
     meta: { requiresAuth: false }
   },
-  { 
-    path: "/", 
-    redirect: "/chat" 
-  },
-  { 
-    path: "/login", 
+  {
+    path: "/login",
+    name: "Login",
     component: Login,
     meta: { requiresAuth: false }
   },
-  { 
-    path: "/profile", 
-    component: Profile,
+  {
+    path: "/",
+    redirect: "/chat"
+  },
+  {
+    path: "/chat",
+    name: "Chat",
+    component: Chat,
     meta: { requiresAuth: true }
   },
-  { 
-    path: "/chat", 
-    component: Chat,
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
     meta: { requiresAuth: true }
   }
 ];
@@ -38,25 +41,23 @@ const router = createRouter({
   routes,
 });
 
-// Navigation guard
-router.beforeEach(async (to, from, next) => {
-  // Allow callback and login routes without authentication
-  if (to.meta.requiresAuth === false) {
-    next();
-    return;
+router.beforeEach(async (to) => {
+  if (to.path === '/callback') {
+    return true;
   }
 
-  try {
-    const session = await fetchAuthSession();
-    if (session.tokens) {
-      next(); // User is authenticated, proceed
-    } else {
-      next('/login');
+  if (to.meta.requiresAuth) {
+    try {
+      const session = await fetchAuthSession();
+      if (!session.tokens) {
+        return '/login';
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      return '/login';
     }
-  } catch (error) {
-    console.error('Auth check failed:', error);
-    next('/login');
   }
+  return true;
 });
 
 export default router;
