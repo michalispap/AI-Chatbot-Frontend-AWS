@@ -16,7 +16,7 @@ export const useAuthStore = defineStore("auth", () => {
   const isAuthenticated = ref(false);
   const isLoading = ref(true);
 
-  // Function to ensure user has a profile (won't modify existing profiles)
+  // Function to ensure user has a profile (won't modify existing profiles unless they're empty)
   const ensureUserProfile = async (userId) => {
     try {
       console.log("Checking if profile exists for:", userId);
@@ -25,7 +25,35 @@ export const useAuthStore = defineStore("auth", () => {
       try {
         const response = await apiClient.get(`/api/students/${userId}`);
         console.log("Profile exists:", response.data);
-        return; // Profile exists, do nothing
+        
+        // Check if the profile has name data - if not, update it
+        if (!response.data.first_name || !response.data.last_name || 
+            response.data.first_name === "" || response.data.last_name === "") {
+          console.log("Profile exists but has empty fields, updating...");
+          
+          // Get email
+          let email = response.data.email || '';
+          if (!email) {
+            try {
+              const attributes = await fetchUserAttributes();
+              email = attributes.email || '';
+            } catch (err) {
+              console.warn("Couldn't fetch user attributes");
+            }
+          }
+          
+          // Update the empty profile
+          await apiClient.post("/api/students/upsert", {
+            id: userId,
+            first_name: "Student",
+            last_name: "User",
+            email: email
+          });
+          
+          console.log("Updated empty profile with default values");
+        }
+        
+        return; // Profile exists with data, do nothing
       } catch (error) {
         // Determine if we should create a profile based on the error
         let shouldCreateProfile = false;
