@@ -128,7 +128,7 @@ onMounted(() => {
   scrollToBottom();
   
   // Check tokens on initial load
-  checkAvailableTokens();
+  //checkAvailableTokens();
   
   // Set up interval to check tokens periodically (every 5 minutes)
   tokenCheckInterval.value = setInterval(() => {
@@ -167,7 +167,9 @@ const checkAvailableTokens = async () => {
     const userId = cognitoUser.userId;
     
     const response = await apiClient.get(`/api/chat/available_tokens/${userId}`);
-    availableTokens.value = response.data.tokens || response.data;
+    // Get token count from response and ensure it's not negative
+    let tokenCount = response.data.tokens || response.data;
+    availableTokens.value = tokenCount <= 0 ? 0 : tokenCount;
     
     // Show warning if tokens are below 1000
     if (availableTokens.value < 1000) {
