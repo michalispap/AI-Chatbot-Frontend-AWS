@@ -7,6 +7,7 @@ import {
   signInWithRedirect,
   autoSignIn
 } from 'aws-amplify/auth';
+import { useChatStore } from "./chat"; // Add this import
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -23,6 +24,10 @@ export const useAuthStore = defineStore("auth", () => {
         const userData = await getCurrentUser();
         user.value = userData;
         isAuthenticated.value = true;
+        
+        // Initialize chat store with user ID
+        const chatStore = useChatStore();
+        await chatStore.setUserId();
       } else {
         throw new Error('No valid session');
       }
@@ -50,6 +55,10 @@ export const useAuthStore = defineStore("auth", () => {
       await signOut({ global: true });
       user.value = null;
       isAuthenticated.value = false;
+      
+      // Clear chat data on logout
+      const chatStore = useChatStore();
+      chatStore.clearUserData();
     } catch (error) {
       console.error("Error signing out:", error);
     }
