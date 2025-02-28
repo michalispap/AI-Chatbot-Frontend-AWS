@@ -88,23 +88,39 @@ export const useAuthStore = defineStore("auth", () => {
   const checkAuth = async () => {
     isLoading.value = true;
     try {
-      await autoSignIn();
-      const session = await fetchAuthSession();
-      if (session.tokens) {
-        const userData = await getCurrentUser();
-        user.value = userData;
-        isAuthenticated.value = true;
-        
-        console.log("User authenticated:", userData.userId);
-        
-        // Initialize chat store with user ID
-        const chatStore = useChatStore();
-        await chatStore.setUserId();
-        
-        // Check and create profile if needed
-        await ensureUserProfile(userData.userId);
-      } else {
-        throw new Error('No valid session');
+      // Try autoSignIn but wrap it in try/catch to handle errors gracefully
+      try {
+        await autoSignIn();
+        console.log("AutoSignIn completed successfully");
+      } catch (autoSignInError) {
+        // This error is expected in many cases, so we just log it and continue
+        console.log("AutoSignIn not applicable:", autoSignInError.message);
+        // We can continue with the regular auth flow
+      }
+      
+      // Continue with session check regardless of autoSignIn result
+      try {
+        const session = await fetchAuthSession();
+        if (session.tokens) {
+          const userData = await getCurrentUser();
+          user.value = userData;
+          isAuthenticated.value = true;
+          
+          console.log("User authenticated:", userData.userId);
+          
+          // Initialize chat store with user ID
+          const chatStore = useChatStore();
+          await chatStore.setUserId();
+          
+          // Check and create profile if needed
+          await ensureUserProfile(userData.userId);
+        } else {
+          console.log("No valid tokens in session");
+          throw new Error('No valid session');
+        }
+      } catch (sessionError) {
+        console.log("Session check failed:", sessionError.message);
+        throw sessionError;
       }
     } catch (error) {
       console.error("Authentication error:", error);
