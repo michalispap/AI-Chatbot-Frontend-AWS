@@ -233,7 +233,7 @@ const sendMessage = async () => {
       
       // Get previous messages
       const previousMessages = messages.value
-        .filter(msg => msg.id !== aiTypingId)
+        .filter(msg => msg.id !== aiTypingId && msg.id !== userMsgId)
         .slice(-5) // Get last 5 messages for context
         .map(msg => ({
           role: msg.role,
