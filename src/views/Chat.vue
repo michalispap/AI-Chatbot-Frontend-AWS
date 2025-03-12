@@ -25,7 +25,7 @@
           </span>
         </template>
         <template v-else>
-          <span class="message-text" :class="{'animate-text': msg.id === lastMessageId}">
+          <span class="message-text" :class="{'animate-text': msg.id === lastMessageId}" v-html="renderMarkdown(msg.message)"></span>
             {{ msg.message }}
           </span>
         </template>
