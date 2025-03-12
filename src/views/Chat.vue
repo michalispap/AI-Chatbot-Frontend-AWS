@@ -95,6 +95,13 @@ import { useChatStore } from "../stores/chat";
 import { storeToRefs } from "pinia";
 import apiClient from "../services/api";
 import { getCurrentUser } from 'aws-amplify/auth';
+import MarkdownIt from 'markdown-it';
+
+const md = new MarkdownIt({
+  html: false,      // Disable HTML tags in source
+  breaks: true,     // Convert '\n' in paragraphs into <br>
+  linkify: true     // Autoconvert URL-like text to links
+});
 
 const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
@@ -312,6 +319,12 @@ const sendMessage = async () => {
 const bubbleClass = (role) => {
   return role === "ai" ? "ai-message" : "user-message";
 };
+
+const renderMarkdown = (text) => {
+  if (!text) return '';
+  return md.render(text);
+};
+
 </script>
 
 <style scoped>
@@ -656,5 +669,42 @@ const bubbleClass = (role) => {
   .chat-input-area {
     padding: 10px;
   }
+}
+
+.message :deep(p) {
+  margin: 0 0 10px 0;
+}
+
+.message :deep(pre) {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.message :deep(code) {
+  font-family: monospace;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.message :deep(ul), .message :deep(ol) {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.message :deep(a) {
+  color: #0078d7;
+  text-decoration: underline;
+}
+
+.ai-message :deep(a) {
+  color: #0078d7;
+}
+
+.user-message :deep(a) {
+  color: #ffffff;
+  text-decoration: underline;
 }
 </style>
