@@ -231,10 +231,20 @@ const sendMessage = async () => {
       const cognitoUser = await getCurrentUser();
       const studentId = cognitoUser.userId;
       
+      // Get previous messages
+      const previousMessages = messages.value
+        .filter(msg => msg.id !== aiTypingId)
+        .slice(-5) // Get last 5 messages for context
+        .map(msg => ({
+          role: msg.role,
+          message: msg.message
+        }));
+
       // Send message to real backend endpoint with updated payload format
       const response = await apiClient.post("/api/chat/prompt", {
         prompt: userText,
-        studentId: studentId // Include the Cognito User ID
+        studentId: studentId, // Include the Cognito User ID
+        previousMessages: previousMessages // Include previous messages
       });
       
       // Remove typing indicator
