@@ -41,12 +41,37 @@ export const useAuthStore = defineStore("auth", () => {
               console.warn("Couldn't fetch user attributes");
             }
           }
-          
+
+          // Extract names from UvA student email
+          let firstName = "Student";
+          let lastName = "User";
+
+          if (email && email.endsWith("@student.uva.nl")) {
+            try {
+              const [localPart] = email.split('@');
+              const nameParts = localPart.split('.');
+              
+              // Only use if we have at least two parts (firstName.lastName)
+              if (nameParts.length >= 2) {
+                firstName = nameParts[0];
+                // Join all remaining parts as last name (handles middle names)
+                lastName = nameParts.slice(1).join(' ');
+                
+                // Capitalize first letter of each name
+                firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+                lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+              }
+            } catch (err) {
+              console.warn("Failed to parse name from email:", err);
+              // Fall back to defaults if parsing fails
+            }
+          }
+
           // Update the empty profile
           await apiClient.post("/api/students/upsert", {
             id: userId,
-            first_name: "Student",
-            last_name: "User",
+            first_name: firstName,
+            last_name: lastName,
             email: email
           });
           
@@ -87,6 +112,31 @@ export const useAuthStore = defineStore("auth", () => {
             console.warn("Couldn't fetch user attributes:", err);
           }
 
+          // Extract names from UvA student email
+          let firstName = "Student";
+          let lastName = "User";
+
+          if (email && email.endsWith("@student.uva.nl")) {
+            try {
+              const [localPart] = email.split('@');
+              const nameParts = localPart.split('.');
+              
+              // Only use if we have at least two parts (firstName.lastName)
+              if (nameParts.length >= 2) {
+                firstName = nameParts[0];
+                // Join all remaining parts as last name (handles middle names)
+                lastName = nameParts.slice(1).join(' ');
+                
+                // Capitalize first letter of each name
+                firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+                lastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+              }
+            } catch (err) {
+              console.warn("Failed to parse name from email:", err);
+              // Fall back to defaults if parsing fails
+            }
+          }
+
           console.log("Creating new profile with data:", {
             id: userId,
             email: email
@@ -96,8 +146,8 @@ export const useAuthStore = defineStore("auth", () => {
           try {
             const response = await apiClient.post("/api/students/upsert", {
               id: userId,
-              first_name: "Student",
-              last_name: "User",
+              first_name: firstName,
+              last_name: lastName,
               email: email
             });
             console.log("Successfully created profile:", response.data);
