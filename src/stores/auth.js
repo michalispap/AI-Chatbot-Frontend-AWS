@@ -46,7 +46,7 @@ export const useAuthStore = defineStore("auth", () => {
           let firstName = "Student";
           let lastName = "User";
 
-          if (email && email.endsWith("@student.uva.nl")) {
+          if (email && email.endsWith("uva.nl")) {
             try {
               const [localPart] = email.split('@');
               const nameParts = localPart.split('.');
@@ -116,7 +116,7 @@ export const useAuthStore = defineStore("auth", () => {
           let firstName = "Student";
           let lastName = "User";
 
-          if (email && email.endsWith("@student.uva.nl")) {
+          if (email && email.endsWith("uva.nl")) {
             try {
               const [localPart] = email.split('@');
               const nameParts = localPart.split('.');
