@@ -1,6 +1,6 @@
 
 
-# Better Canvas (Student Portal)
+# Better Canvas (Student Portal) - AI Chatbot
 
 A modern, user-friendly student portal application built with Vue.js, providing a cleaner alternative to traditional learning management systems.
 
