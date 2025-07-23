@@ -156,12 +156,6 @@ better-canvas/
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
-
-- Vue.js team for the excellent framework
-- AWS for their authentication services
-- All contributors and maintainers
-
 ---
 
 Built with ❤️ by the 🇬🇷 team
